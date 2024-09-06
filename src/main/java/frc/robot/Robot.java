@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +21,7 @@ public class Robot extends TimedRobot {
 
 // #ColinFlip
 
+  SlewRateLimiter limit = new SlewRateLimiter(100);
   CANSparkMax l1 = new CANSparkMax(53, MotorType.kBrushless);
   CANSparkMax l2 = new CANSparkMax(56, MotorType.kBrushless);
   CANSparkMax r1 = new CANSparkMax(54, MotorType.kBrushless);
@@ -76,12 +78,18 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     double left  = 0;
     double right = 0;
+    double netSpeed = driver.getRightTriggerAxis() - driver.getLeftTriggerAxis();
 
-      left  -= 0.5 * driver.getLeftX();
-      right += 0.5 * driver.getLeftX();
+    left  -= 0.5 * driver.getLeftX();
+    right += 0.5 * driver.getLeftX();
 
-    left += driver.getLeftY();
-    right += driver.getLeftY();
+    if (netSpeed < 0.05){
+      left  *= -1;
+      right *= -1;
+    }
+
+    left  += netSpeed;
+    right += netSpeed;
 
     left = MathUtil.clamp(left, -1, 1);
     right = MathUtil.clamp(right, -1, 1);
