@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -34,6 +35,10 @@ public class Robot extends TimedRobot {
     l2.setInverted(false);
     r1.setInverted(true );
     r2.setInverted(true );
+    l1.setIdleMode(IdleMode.kBrake);
+    l2.setIdleMode(IdleMode.kBrake);
+    r1.setIdleMode(IdleMode.kBrake);
+    r2.setIdleMode(IdleMode.kBrake);
   }
 
   @Override
