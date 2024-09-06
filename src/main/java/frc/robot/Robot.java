@@ -20,8 +20,11 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
 // #ColinFlip
+  double limitValue = 100;
+  double deadband = 0.05;
 
-  SlewRateLimiter limit = new SlewRateLimiter(100);
+  SlewRateLimiter limit = new SlewRateLimiter(limitValue);
+
   CANSparkMax l1 = new CANSparkMax(53, MotorType.kBrushless);
   CANSparkMax l2 = new CANSparkMax(56, MotorType.kBrushless);
   CANSparkMax r1 = new CANSparkMax(54, MotorType.kBrushless);
@@ -29,13 +32,18 @@ public class Robot extends TimedRobot {
 
   XboxController driver = new XboxController(0);
 
+
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
-    l1.setInverted(false);
-    l2.setInverted(false);
-    r1.setInverted(true );
-    r2.setInverted(true );
+    l1.setInverted(true);
+    l2.setInverted(true);
+    r1.setInverted(false );
+    r2.setInverted(false );
+    l1.burnFlash();
+    l2.burnFlash();
+    r1.burnFlash();
+    r2.burnFlash();
   }
 
   @Override
@@ -83,7 +91,7 @@ public class Robot extends TimedRobot {
     left  -= 0.5 * driver.getLeftX();
     right += 0.5 * driver.getLeftX();
 
-    if (netSpeed < 0.05){
+    if (netSpeed < deadband){
       left  *= -1;
       right *= -1;
     }
@@ -91,16 +99,16 @@ public class Robot extends TimedRobot {
     left  += netSpeed;
     right += netSpeed;
 
-    left = MathUtil.clamp(left, -1, 1);
+    left  = MathUtil.clamp(left , -1, 1);
     right = MathUtil.clamp(right, -1, 1);
 
-    left  = MathUtil.applyDeadband(left,  0.05);
-    right = MathUtil.applyDeadband(right, 0.05);
+    left  = MathUtil.applyDeadband(limit.calculate(left ), deadband);
+    right = MathUtil.applyDeadband(limit.calculate(right), deadband);
 
-    l1.set(-left);
-    l2.set(-left);
-    r1.set(-right);
-    r2.set(-right);
+    l1.set(left);
+    l2.set(left);
+    r1.set(right);
+    r2.set(right);
   }
 
   @Override
