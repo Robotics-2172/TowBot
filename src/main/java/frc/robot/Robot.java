@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -34,6 +35,16 @@ public class Robot extends TimedRobot {
     l2.setInverted(false);
     r1.setInverted(true );
     r2.setInverted(true );
+
+    l1.setIdleMode(IdleMode.kBrake);
+    l2.setIdleMode(IdleMode.kBrake);
+    r1.setIdleMode(IdleMode.kBrake);
+    r2.setIdleMode(IdleMode.kBrake);
+
+    l1.burnFlash();
+    l2.burnFlash();
+    r1.burnFlash();
+    r2.burnFlash();
   }
 
   @Override
@@ -77,11 +88,18 @@ public class Robot extends TimedRobot {
     double left  = 0;
     double right = 0;
 
+    double temp = (l1.getMotorTemperature() + l2.getMotorTemperature() + r1.getMotorTemperature() + r2.getMotorTemperature())/4;
+
       left  -= 0.5 * driver.getLeftX();
       right += 0.5 * driver.getLeftX();
 
-    left += driver.getLeftY();
-    right += driver.getLeftY();
+      if (driver.getRightTriggerAxis() - driver.getLeftTriggerAxis() < 0){
+        left  *= -1;
+        right *= -1;
+      }
+
+    left += driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+    right += driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
 
     left = MathUtil.clamp(left, -1, 1);
     right = MathUtil.clamp(right, -1, 1);
@@ -89,10 +107,17 @@ public class Robot extends TimedRobot {
     left  = MathUtil.applyDeadband(left,  0.05);
     right = MathUtil.applyDeadband(right, 0.05);
 
+    if (temp > 50){
+      left *= 0.2;
+      right *= 0.2;
+    }
+
     l1.set(-left);
     l2.set(-left);
     r1.set(-right);
     r2.set(-right);
+
+    System.out.println(temp);
   }
 
   @Override
